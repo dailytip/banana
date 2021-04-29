@@ -1,0 +1,31 @@
+// Copyright © 2017, 2019-2020 DailyTip Banana Inc.
+// All rights reserved. No part of this file may be copied, reproduced,
+// distributed, or transmitted in any form or by any means,
+// including, but not limited to, photocopying, recording, or
+// other electronic or mechanical methods, without the prior
+// written permission of DailyTip Banana Inc.
+
+pipeline {
+    agent { label 'BUILD-VM'}
+    stages {
+        stage('Clone tools repo') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: 'refs/heads/master']],
+                    doGenerateSubmoduleConfigurations: false,
+                    extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'tools']],
+                    submoduleCfg: [],
+                    userRemoteConfigs: [[credentialsId: 'some_id', url: "git@bitbucket.org:dailytip/banana.git"]]
+                    ])
+            }
+        }
+        stage('Run script') {
+            steps {
+                dir('jenkins-pipelines/loadbuild/upload_flint_change_log') {
+                    sh './upload_flint_change_log.sh'
+                }
+            }
+        }
+    }
+}
